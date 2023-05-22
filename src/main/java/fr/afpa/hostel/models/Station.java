@@ -3,6 +3,10 @@ package fr.afpa.hostel.models;
 
 import java.util.List;
 
+import org.springframework.web.multipart.MultipartFile;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -11,6 +15,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 @Entity
 @Table(name="station")
@@ -35,6 +40,17 @@ public class Station {
     @OneToMany(mappedBy = "station", cascade = CascadeType.PERSIST)
     private List<Hostel> hostels;
 
+    @Column(name = "image_name")
+    private String imageName;
+
+    /**
+     * Attribut permettant de récupérer une image à partir d'une requête http "multipart/data".
+     * Attention, le contenu du fichier est stocké de manière temporaire (en mémoire ou sur le disque)
+     */
+    @JsonIgnore
+    @Transient
+    private MultipartFile multipartFileImage;
+
     public Station() {}
 
     public int getId() {
@@ -47,6 +63,14 @@ public class Station {
 
     public String getName() {
         return name;
+    }
+
+    public MultipartFile getMultipartFileImage() {
+        return multipartFileImage;
+    }
+
+    public void setMultipartFileImage(MultipartFile image) {
+        this.multipartFileImage = image;
     }
 
     public void setName(String name) {
@@ -67,5 +91,13 @@ public class Station {
 
     public void setHostels(List<Hostel> hostels) {
         this.hostels = hostels;
+    }
+
+    public String getImageName() {
+        return imageName;
+    }
+
+    public void setImageName(String imageName) {
+        this.imageName = imageName;
     }
 }
