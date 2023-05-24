@@ -2,13 +2,13 @@ package fr.afpa.hostel.controllers;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
 import java.util.Base64;
-import java.util.Date;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -67,22 +67,30 @@ public class StationController {
      @PostMapping(value = "/stations", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
      @ResponseStatus(HttpStatus.OK)
      public Station post(@ModelAttribute Station station) {
-          // récupération du dossier de stockage (issu du fichier de configuration
-          // "application.properties")
-
           try {
-
-               if (!station.getMultipartFileImage().isEmpty()) {
+               // on récupère l'image provenant de la classe Station (traitement automatique à partir de la requête)
+               MultipartFile imageFile = station.getImageFile();
+               if (!imageFile.isEmpty()) {
                     logger.info("Sauvegarde du fichier image");
 
-                    String storageHash = getStorageHash(station.getMultipartFileImage()).get();
+                    // calcul du hash du fichier pour obtenir un nom unique
+                    String storageHash = getStorageHash(imageFile).get();
                     Path rootLocation = this.fileStorageService.getRootLocation();
+                    // récupération de l'extension
+                    String fileExtension = mimeTypeToExtension(imageFile.getContentType());
+                    // ajout de l'extension au nom du fichier
+                    storageHash = storageHash + fileExtension;
+                    // on retrouve le chemin de stockage de l'image
                     Path saveLocation = rootLocation.resolve(storageHash);
+
                     // suppression du fichier au besoin
                     Files.deleteIfExists(saveLocation);
-                    // tentative de sauvegarde
-                    Files.copy(station.getMultipartFileImage().getInputStream(), saveLocation);
 
+                    // tentative de sauvegarde
+                    Files.copy(imageFile.getInputStream(), saveLocation);
+
+                    // à ce niveau il n'y a pas eu d'exception
+                    // on ajoute le nom utilisé pour stocké l'image
                     station.setImageName(storageHash);
                }
 
@@ -107,8 +115,20 @@ public class StationController {
                logger.error(e.getMessage());
           }
 
-          throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-                    "Impossible de trouver l'image demandée.");
+          throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,"Impossible de trouver l'image demandée.");
+     }
+
+     /**
+      * Retourne l'extension d'un fichier en fonction d'un type MIME
+      * pour plus d'informations sur les types MIME : https://developer.mozilla.org/fr/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Common_types
+      */
+     private String mimeTypeToExtension(String mimeType) {
+          return switch (mimeType) {
+               case "image/jpeg" -> ".jpeg";
+               case "image/png" -> ".png";
+               case "image/svg" -> ".svg";
+               default -> "";
+          };
      }
 
      /**
@@ -123,23 +143,29 @@ public class StationController {
       */
      private Optional<String> getStorageHash(MultipartFile file) {
           String hashString = null;
-          try {
-               MessageDigest messageDigest = MessageDigest.getInstance("MD5");
 
-               // La méthode digest de la classe "MessageDigest" prend en paramètre un byte[]
-               // il faut donc transformer les différents objets utilisés pour le hachage en
-               // tableau d'octets
-               // Nous utiliserons la classe "ByteArrayOutputStream" pour se faire
-               ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-               outputStream.write(file.getName().getBytes());
-               outputStream.write(file.getContentType().getBytes());
-               LocalDate date = LocalDate.now();
-               outputStream.write(date.toString().getBytes());
+          if (!file.isEmpty()){
+               try {
+                    MessageDigest messageDigest = MessageDigest.getInstance("MD5");
+     
+                    // La méthode digest de la classe "MessageDigest" prend en paramètre un byte[]
+                    // il faut donc transformer les différents objets utilisés pour le hachage en
+                    // tableau d'octets
+                    // Nous utiliserons la classe "ByteArrayOutputStream" pour se faire
+                    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                    outputStream.write(file.getName().getBytes());
+                    outputStream.write(file.getContentType().getBytes());
+                    LocalDate date = LocalDate.now();
+                    outputStream.write(date.toString().getBytes());
+     
+                    // calcul du hash, on obtient un tableau d'octets
+                    byte[] hashBytes = messageDigest.digest(outputStream.toByteArray());
 
-               byte[] hashBytes = messageDigest.digest(outputStream.toByteArray());
-               hashString = Base64.getEncoder().encodeToString(hashBytes);
-          } catch (NoSuchAlgorithmException | IOException e) {
-               logger.error(e.getMessage());
+                    // on retrouve une chaîne de caractères à partir d'un tableau d'octets
+                    hashString = String.format("%032x", new BigInteger(1, hashBytes));
+               } catch (NoSuchAlgorithmException | IOException e) {
+                    logger.error(e.getMessage());
+               }
           }
 
           return Optional.ofNullable(hashString);

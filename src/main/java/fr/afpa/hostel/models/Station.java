@@ -49,7 +49,7 @@ public class Station {
      */
     @JsonIgnore
     @Transient
-    private MultipartFile multipartFileImage;
+    private MultipartFile imageFile;
 
     public Station() {}
 
@@ -63,14 +63,6 @@ public class Station {
 
     public String getName() {
         return name;
-    }
-
-    public MultipartFile getMultipartFileImage() {
-        return multipartFileImage;
-    }
-
-    public void setMultipartFileImage(MultipartFile image) {
-        this.multipartFileImage = image;
     }
 
     public void setName(String name) {
@@ -99,5 +91,13 @@ public class Station {
 
     public void setImageName(String imageName) {
         this.imageName = imageName;
+    }
+
+    public MultipartFile getImageFile() {
+        return imageFile;
+    }
+
+    public void setImageFile(MultipartFile imageFile) {
+        this.imageFile = imageFile;
     }
 }

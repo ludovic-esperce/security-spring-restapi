@@ -44,71 +44,8 @@ public class FileStorageService {
      * Constructeur de la classe prenant des propriétés en paramètre.
      * @param properties
      */
-    @Autowired
     public FileStorageService(FileStorageProperties properties) {
         this.rootLocation = Paths.get(properties.getPath());
-    }
-
-    /**
-     * Sauvegarde un fichier temporairement stocké sous la forme d'un objet de
-     * "MultipartFile" sur le disque.
-     * 
-     * @param file Le fichier à stocker
-     */
-    public void store(MultipartFile file) {
-        try {
-            if (file.isEmpty()) {
-                throw new StorageException("Failed to store empty file.");
-            }
-            Path destinationFile = this.rootLocation.resolve(Paths.get(file.getOriginalFilename())).normalize().toAbsolutePath();
-            if (!destinationFile.getParent().equals(this.rootLocation.toAbsolutePath())) {
-                // This is a security check
-                throw new StorageException("Cannot store file outside current directory.");
-            }
-            try (InputStream inputStream = file.getInputStream()) {
-                Files.copy(inputStream, destinationFile, StandardCopyOption.REPLACE_EXISTING);
-            }
-        } catch (IOException e) {
-            throw new StorageException("Failed to store file.", e);
-        }
-    }
-
-    /***
-     * Permet de charger tous les fichiers contenu dans le dossier racine.
-     * @return
-     */
-    public Stream<Path> loadAll() {
-        try {
-            return Files.walk(this.rootLocation, 1)
-                    .filter(path -> !path.equals(this.rootLocation))
-                    .map(this.rootLocation::relativize);
-        } catch (IOException e) {
-            throw new StorageException("Failed to read stored files", e);
-        }
-
-    }
-
-    public Path load(String filename) {
-        return rootLocation.resolve(filename);
-    }
-
-    public Resource loadAsResource(String filename) {
-        try {
-            Path file = load(filename);
-            Resource resource = new UrlResource(file.toUri());
-            if (resource.exists() || resource.isReadable()) {
-                return resource;
-            } else {
-                throw new StorageException("Could not read file: " + filename);
-
-            }
-        } catch (MalformedURLException e) {
-            throw new StorageException("Could not read file: " + filename, e);
-        }
-    }
-
-    public void deleteAll() {
-        FileSystemUtils.deleteRecursively(rootLocation.toFile());
     }
 
     @PostConstruct
@@ -124,6 +61,76 @@ public class FileStorageService {
         } catch (IOException e) {
             throw new StorageException("Could not initialize storage", e);
         }
+    }
+    
+    /**
+     * Sauvegarde un fichier temporairement stocké sous la forme d'un objet de
+     * "MultipartFile" sur le disque.
+     * 
+     * @param file Le fichier à stocker
+     */
+    public void store(MultipartFile file) {
+        try {
+            if (file.isEmpty()) {
+                throw new StorageException("Impossible de sauvegarder un fichier vide.");
+            }
+            Path destinationFile = this.rootLocation.resolve(Paths.get(file.getOriginalFilename())).normalize().toAbsolutePath();
+            if (!destinationFile.getParent().equals(this.rootLocation.toAbsolutePath())) {
+                throw new StorageException("Cannot store file outside current directory.");
+            }
+            try (InputStream inputStream = file.getInputStream()) {
+                // copie du fichier en remplaçant l'existant
+                Files.copy(inputStream, destinationFile, StandardCopyOption.REPLACE_EXISTING);
+            }
+        } catch (IOException e) {
+            throw new StorageException("Impossible de sauvegarder le fichier.", e);
+        }
+    }
+
+    /***
+     * Permet de charger tous les fichiers contenu dans le dossier racine.
+     * @return
+     */
+    public Stream<Path> loadAll() {
+        try {
+            return Files.walk(this.rootLocation, 1)
+                    .filter(path -> !path.equals(this.rootLocation))
+                    .map(this.rootLocation::relativize);
+        } catch (IOException e) {
+            throw new StorageException("Impossible de lire tous les fichiers", e);
+        }
+
+    }
+
+    /**
+     * Chargement d'un fichier contenu dans le dossier "root"
+     * @param filename Le nom du fichier
+     * @return Chemin vers le fichier en question
+     */
+    public Path load(String filename) {
+        return rootLocation.resolve(filename);
+    }
+
+    public Resource loadAsResource(String filename) {
+        try {
+            Path file = load(filename);
+            Resource resource = new UrlResource(file.toUri());
+            if (resource.exists() || resource.isReadable()) {
+                return resource;
+            } else {
+                throw new StorageException("Impossible de lire le fichier : " + filename);
+
+            }
+        } catch (MalformedURLException e) {
+            throw new StorageException("Impossible de lire le fichier : " + filename, e);
+        }
+    }
+
+    /**
+     * Suppression récursive de tous les fichiers du dossier "root"
+     */
+    public void deleteAll() {
+        FileSystemUtils.deleteRecursively(rootLocation.toFile());
     }
 
     public Path getRootLocation() {
