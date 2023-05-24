@@ -105,14 +105,23 @@ public class StationController {
           throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Impossible de sauvegarder la ressource.");
      }
 
-     @GetMapping(value = "/stations/{id}/image")
-     public @ResponseBody byte[] getImage(@PathVariable Long stationId) {
+     @CrossOrigin
+     @GetMapping(value = "/stations/{id}/image", produces = {MediaType.IMAGE_JPEG_VALUE, MediaType.IMAGE_PNG_VALUE})
+     public @ResponseBody byte[] getImage(@PathVariable int id) {
+          
           Path rootLocation = this.fileStorageService.getRootLocation();
+          Optional<Station> station = stationRepository.findById(id);
 
-          try {
-               return Files.readAllBytes(rootLocation);
-          } catch (IOException e) {
-               logger.error(e.getMessage());
+          if (station.isPresent()) {
+
+               String imageName = station.get().getImageName();
+               Path imagePath = rootLocation.resolve(imageName);
+               try {
+                    return Files.readAllBytes(imagePath);
+               } catch (IOException e) {
+                    logger.error(e.getMessage());
+               }
+     
           }
 
           throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,"Impossible de trouver l'image demandée.");
