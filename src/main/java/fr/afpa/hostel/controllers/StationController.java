@@ -162,7 +162,7 @@ public class StationController {
                     // tableau d'octets
                     // Nous utiliserons la classe "ByteArrayOutputStream" pour se faire
                     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-                    outputStream.write(file.getName().getBytes());
+                    outputStream.write(file.getOriginalFilename().getBytes());
                     outputStream.write(file.getContentType().getBytes());
                     LocalDate date = LocalDate.now();
                     outputStream.write(date.toString().getBytes());
