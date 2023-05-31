@@ -13,6 +13,7 @@ import jakarta.persistence.Table;
 @Entity
 @Table(name="hotel")
 public class Hostel {
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;

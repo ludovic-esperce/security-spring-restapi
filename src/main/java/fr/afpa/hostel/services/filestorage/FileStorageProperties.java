@@ -1,4 +1,4 @@
-package fr.afpa.hostel.services;
+package fr.afpa.hostel.services.filestorage;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;

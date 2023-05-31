@@ -1,4 +1,4 @@
-package fr.afpa.hostel.services;
+package fr.afpa.hostel.services.filestorage;
 
 public class StorageException extends RuntimeException {
 

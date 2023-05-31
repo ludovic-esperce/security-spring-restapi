@@ -8,7 +8,6 @@ import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
-import java.util.Base64;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -29,7 +28,7 @@ import org.springframework.http.MediaType;
 
 import fr.afpa.hostel.models.Station;
 import fr.afpa.hostel.repositories.StationRepository;
-import fr.afpa.hostel.services.FileStorageService;
+import fr.afpa.hostel.services.filestorage.FileStorageService;
 
 @RestController
 public class StationController {
@@ -55,7 +54,6 @@ public class StationController {
           return stationRepository.findAll();
      }
 
-     /// localhost:8000/stations/1
      @CrossOrigin
      @GetMapping(value = "/stations/{id}")
      @ResponseStatus(HttpStatus.OK)
