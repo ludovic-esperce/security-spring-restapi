@@ -8,8 +8,9 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.crypto.password.Pbkdf2PasswordEncoder;
+import org.springframework.security.crypto.password.Pbkdf2PasswordEncoder.SecretKeyFactoryAlgorithm;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -18,6 +19,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
  */
 @Configuration
 public class SecurityConfig {
+
+    private final String SECRET_PASSWORD_PEPPER = "secretmagicpepper";
 
     /**
      * L'annotation @Bean est PRIMORDIALE et permet de spécifier que la méthode renvoie une instance de classe qui 
@@ -45,7 +48,7 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable()) // désactivation de la vérification par défaut des attaques CSRF (pas grave vu qu'on va mettre en place un système de jetons)
                 .authorizeHttpRequests((authz) -> authz
                         .requestMatchers(HttpMethod.POST, "/login/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/users/**").hasAuthority("ROLE_ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/users/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/users/**").hasAuthority("ROLE_ADMIN")
                         .anyRequest().authenticated()
                 )
@@ -65,7 +68,9 @@ public class SecurityConfig {
 	 */
 	@Bean
 	PasswordEncoder passwordEncoder() {
-        // TODO changer l'encodeur pour utiliser Pbkdf2PasswordEncoder et du sel stocké en BDD
-		return new BCryptPasswordEncoder();
+
+        // On suit une des recommandations OWasp 
+        // - PBKDF2 with a work factor of 600,000 or more and set with an internal hash function of HMAC-SHA-256é
+		return new Pbkdf2PasswordEncoder(SECRET_PASSWORD_PEPPER, 16, 600000, SecretKeyFactoryAlgorithm.PBKDF2WithHmacSHA256);
 	}
 }

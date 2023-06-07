@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,6 +28,9 @@ public class UserController {
      */
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     /**
      * Retrouve tous les utilisateurs de la base de données.
@@ -64,6 +68,12 @@ public class UserController {
      */
     @PostMapping
     public ResponseEntity<User> save(@RequestBody User user) {
+        
+        // on encode le mot de passe récupéré
+        String encodedPassword = passwordEncoder.encode(user.getPassword());
+        user.setPassword(encodedPassword);
+
+        // une fois le mot de passe encodé on peut le sauvegardé
         User newUser = userRepository.save(user);
 
         // Création de l'URI indiquant l'emplacement de la nouvelle ressource
