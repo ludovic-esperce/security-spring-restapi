@@ -1,0 +1,8 @@
+{ "date_time":"2023-07-07 07:29:41,016", "thread":"[http-nio-0.0.0.0-8000-exec-2]", "log_level":"INFO ",
+                "class_name":"filelogger", "log_message":"Test logging" }
+{ "date_time":"2023-07-07 07:29:41,587", "thread":"[http-nio-0.0.0.0-8000-exec-3]", "log_level":"INFO ",
+                "class_name":"filelogger", "log_message":"Test logging" }
+{ "date_time":"2023-07-07 08:15:07,157", "thread":"[http-nio-0.0.0.0-8000-exec-2]", "log_level":"INFO ",
+                "class_name":"filelogger", "log_message":"Test logging" }
+{ "date_time":"2023-07-07 08:23:13,454", "thread":"[http-nio-0.0.0.0-8000-exec-3]", "log_level":"INFO ",
+                "class_name":"filelogger", "log_message":"Test logging" }

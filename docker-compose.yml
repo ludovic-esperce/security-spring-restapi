@@ -1,0 +1,36 @@
+version: '3.8'
+services:
+  hostel-webap:
+    image: 'hostel-webapi'
+    ports:
+      - "8000:8000"
+    depends_on:
+      PostgreSQL:
+        condition: service_healthy
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://PostgreSQL:5432/hotel
+      - SPRING_DATASOURCE_USERNAME=webapi
+      - SPRING_DATASOURCE_PASSWORD=6LXTSaisjymEsc
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=none
+
+  PostgreSQL:
+    image: postgres:15
+    container_name: hotel-db
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=B@nLgU4qz*9?D~3n83
+      - POSTGRES_DB=hotel
+    logging: # option de paramétrage des logs
+      options:
+        max-size: 10m # fichier de 10 Mo maximum
+        max-file: "3" # jusqu'à 3 fichiers de log
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    ports:
+      - '5432:5432'
+    volumes:
+      - ./db/1_db-creation.sql:/docker-entrypoint-initdb.d/1_db-creation.sql
+

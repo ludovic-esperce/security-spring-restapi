@@ -32,6 +32,9 @@ import jakarta.servlet.http.HttpServletResponse;
  */
 public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
+    /**
+     * Constante définissant le message d'erreur en cas d'erreu d'authentification
+     */
     private static final String BAD_CREDENTIAL_MESSAGE = "Echec de l'autentification pour l'utilisateur : %s";
 
     private AuthenticationManager authenticationManager;

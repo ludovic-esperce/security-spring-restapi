@@ -7,6 +7,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,6 +19,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import fr.afpa.hostel.models.Role;
 import fr.afpa.hostel.models.User;
 import fr.afpa.hostel.repositories.UserRepository;
+import jakarta.transaction.Transactional;
 
 @RestController
 @RequestMapping("users")
@@ -34,6 +36,7 @@ public class UserController {
 
     /**
      * Retrouve tous les utilisateurs de la base de données.
+     * 
      * @return
      */
     @GetMapping
@@ -53,14 +56,16 @@ public class UserController {
         } else {
             return ResponseEntity.notFound().build();
         }
+
     }
 
     /**
      * Retrouve l'utilisateur par nom
      */
     @GetMapping("/{name}")
-    public ResponseEntity<User> findByUsername(@PathVariable String name) {
-        return ResponseEntity.ok().body(userRepository.findByName(name));
+    public ResponseEntity<String> findByUsername(@PathVariable String name) {
+        System.out.println(name);
+        return ResponseEntity.ok().body(name);
     }
 
     /**
@@ -68,7 +73,7 @@ public class UserController {
      */
     @PostMapping
     public ResponseEntity<User> save(@RequestBody User user) {
-        
+
         // on encode le mot de passe récupéré
         String encodedPassword = passwordEncoder.encode(user.getPassword());
         user.setPassword(encodedPassword);
@@ -92,7 +97,7 @@ public class UserController {
             return ResponseEntity.ok().body(user.get().getRoles());
         } else {
             return ResponseEntity.notFound().build();
-        } 
+        }
     }
 
     /**
@@ -104,7 +109,7 @@ public class UserController {
         if (user.isPresent()) {
             user.get().addRole(role);
             URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
-            .buildAndExpand(user.get().getId()).toUriString());
+                    .buildAndExpand(user.get().getId()).toUriString());
             return ResponseEntity.created(uri).body(user.get());
         } else {
             return ResponseEntity.notFound().build();

@@ -58,7 +58,7 @@ public abstract class JwtUtil {
             Payload payload = new Payload(claims.toJSONObject());
 
             JWSObject jwsObject = new JWSObject(new JWSHeader(JWSAlgorithm.HS256), payload);
-
+            
             jwsObject.sign(new MACSigner(SECRET));
             return jwsObject.serialize();
         } catch (JOSEException e) {

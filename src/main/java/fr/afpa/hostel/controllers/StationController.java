@@ -8,8 +8,10 @@ import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
+import org.hibernate.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,12 +25,20 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.object.SqlQuery;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import fr.afpa.hostel.models.Station;
 import fr.afpa.hostel.repositories.StationRepository;
 import fr.afpa.hostel.services.filestorage.FileStorageService;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
+import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 public class StationController {
@@ -39,7 +49,7 @@ public class StationController {
       * Pour plus d'informations sur slf4j ->
       * https://www.baeldung.com/slf4j-with-log4j2-logback
       */
-     Logger logger = LoggerFactory.getLogger(FileStorageService.class);
+     Logger logger = LoggerFactory.getLogger("fr.afpa.filelogger");
 
      @Autowired
      private StationRepository stationRepository;
@@ -47,26 +57,64 @@ public class StationController {
      @Autowired
      private FileStorageService fileStorageService;
 
-     @CrossOrigin
+     @PersistenceContext
+     EntityManager entityManager;
+
+     private Station foo(Integer id) {
+
+          // final Iterable<Station> stations =
+
+          final Optional<Station> station = stationRepository.findById(id);
+          // final Station station = stations.iterator().next();
+
+          return station.get();
+     }
+
      @GetMapping(value = "/stations")
-     @ResponseStatus(HttpStatus.OK)
      public Iterable<Station> get() {
           return stationRepository.findAll();
      }
 
      @CrossOrigin
-     @GetMapping(value = "/stations/{id}")
+     @GetMapping(value = "/stations/{id}/**")
      @ResponseStatus(HttpStatus.OK)
-     public Station get(@PathVariable(required = true) Integer id) {
-          return stationRepository.findById(id).get();
+     @Transactional
+     public Station get(@PathVariable Integer id, HttpServletRequest request) {
+
+          if (TransactionSynchronizationManager.isActualTransactionActive()) {
+
+               // récupération du l'identifiant de transaction
+               // Query query = entityManager.createQuery("select txid_current()");
+
+
+               // List<Object[]> result = query.getResultList();
+               // for (Object[] a : result) {
+               // System.out.println("Transaction ID : " + a[0]);
+               // }
+
+               logger.info("Test logging");
+
+               String folderPath = (String) request.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE);
+               System.out.println(folderPath);
+               return foo(id);
+          }
+          return null;
      }
+
+     // @CrossOrigin
+     // @GetMapping(value = "/stations/{id}")
+     // @ResponseStatus(HttpStatus.OK)
+     // public Station get(@PathVariable(required = true) Integer id) {
+     // return stationRepository.findById(id).get();
+     // }
 
      @CrossOrigin
      @PostMapping(value = "/stations", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
      @ResponseStatus(HttpStatus.OK)
      public Station post(@ModelAttribute Station station) {
           try {
-               // on récupère l'image provenant de la classe Station (traitement automatique à partir de la requête)
+               // on récupère l'image provenant de la classe Station (traitement automatique à
+               // partir de la requête)
                MultipartFile imageFile = station.getImageFile();
                if (!imageFile.isEmpty()) {
                     logger.info("Sauvegarde du fichier image");
@@ -100,13 +148,14 @@ public class StationController {
           }
 
           // Si on arrive là alors erreur
-          throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Impossible de sauvegarder la ressource.");
+          throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Impossible de sauvegarder la ressource.");
      }
 
      @CrossOrigin
-     @GetMapping(value = "/stations/{id}/image", produces = {MediaType.IMAGE_JPEG_VALUE, MediaType.IMAGE_PNG_VALUE})
+     @GetMapping(value = "/stations/{id}/image", produces = { MediaType.IMAGE_JPEG_VALUE, MediaType.IMAGE_PNG_VALUE })
      public @ResponseBody byte[] getImage(@PathVariable int id) {
-          
+
           Path rootLocation = this.fileStorageService.getRootLocation();
           Optional<Station> station = stationRepository.findById(id);
 
@@ -119,15 +168,17 @@ public class StationController {
                } catch (IOException e) {
                     logger.error(e.getMessage());
                }
-     
+
           }
 
-          throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,"Impossible de trouver l'image demandée.");
+          throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Impossible de trouver l'image demandée.");
      }
 
      /**
       * Retourne l'extension d'un fichier en fonction d'un type MIME
-      * pour plus d'informations sur les types MIME : https://developer.mozilla.org/fr/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Common_types
+      * pour plus d'informations sur les types MIME :
+      * https://developer.mozilla.org/fr/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Common_types
       */
      private String mimeTypeToExtension(String mimeType) {
           return switch (mimeType) {
@@ -151,10 +202,10 @@ public class StationController {
      private Optional<String> getStorageHash(MultipartFile file) {
           String hashString = null;
 
-          if (!file.isEmpty()){
+          if (!file.isEmpty()) {
                try {
                     MessageDigest messageDigest = MessageDigest.getInstance("MD5");
-     
+
                     // La méthode digest de la classe "MessageDigest" prend en paramètre un byte[]
                     // il faut donc transformer les différents objets utilisés pour le hachage en
                     // tableau d'octets
@@ -164,7 +215,7 @@ public class StationController {
                     outputStream.write(file.getContentType().getBytes());
                     LocalDate date = LocalDate.now();
                     outputStream.write(date.toString().getBytes());
-     
+
                     // calcul du hash, on obtient un tableau d'octets
                     byte[] hashBytes = messageDigest.digest(outputStream.toByteArray());
 

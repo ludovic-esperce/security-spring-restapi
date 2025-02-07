@@ -1,11 +1,12 @@
 package fr.afpa.hostel.models;
 
-
 import java.util.List;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -18,9 +19,10 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 
 @Entity
-@Table(name="station")
+@Table(name = "station")
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Station {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
@@ -32,10 +34,12 @@ public class Station {
     private int altitude;
 
     /**
-     * Le CascadeTYpe.PERSIST permet d'indiquer à l'ORM qu'il lui faut insérer les objets de "hostels" en relation
+     * Le CascadeTYpe.PERSIST permet d'indiquer à l'ORM qu'il lui faut insérer les
+     * objets de "hostels" en relation
      * lors de la création d'une station
      * 
-     * Pour plus d'informations concernant les CascadeType : https://openjpa.apache.org/builds/2.4.0/apache-openjpa/docs/jpa_overview_meta_field.html#jpa_overview_meta_cascade
+     * Pour plus d'informations concernant les CascadeType :
+     * https://openjpa.apache.org/builds/2.4.0/apache-openjpa/docs/jpa_overview_meta_field.html#jpa_overview_meta_cascade
      */
     @OneToMany(mappedBy = "station", cascade = CascadeType.PERSIST)
     private List<Hostel> hostels;
@@ -44,14 +48,17 @@ public class Station {
     private String imageName;
 
     /**
-     * Attribut permettant de récupérer une image à partir d'une requête http "multipart/data".
-     * Attention, le contenu du fichier est stocké de manière temporaire (en mémoire ou sur le disque)
+     * Attribut permettant de récupérer une image à partir d'une requête http
+     * "multipart/data".
+     * Attention, le contenu du fichier est stocké de manière temporaire (en mémoire
+     * ou sur le disque)
      */
     @JsonIgnore
     @Transient
     private MultipartFile imageFile;
 
-    public Station() {}
+    public Station() {
+    }
 
     public int getId() {
         return id;

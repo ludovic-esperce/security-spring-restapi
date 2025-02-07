@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!-- Pour plus d'informations sur la configuration de logback se référer à :
+    https://docs.spring.io/spring-boot/docs/current/reference/html/howto.html#howto.logging.logback -->
+    <include resource="org/springframework/boot/logging/logback/defaults.xml" />
+    <include resource="org/springframework/boot/logging/logback/console-appender.xml" />
+    <include resource="org/springframework/boot/logging/logback/file-appender.xml" />
+
+    <appender name="AUTHENTICATION_FILE" class="ch.qos.logback.core.FileAppender">
+        <file>authentication.log</file>
+        <append>true</append>
+        <immediateFlush>true</immediateFlush>
+        <encoder>
+            <pattern>{ "date_time":"%date", "log_level":"%-5level", "class_name":"%logger{0}", "log_message":"%msg" }%n</pattern>
+        </encoder>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="CONSOLE" />
+    </root>
+
+    <logger name="fr.afpa.filelogger">
+        <appender-ref ref="AUTHENTICATION_FILE" />
+    </logger>
+</configuration>

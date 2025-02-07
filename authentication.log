@@ -1,0 +1,14 @@
+{ "date_time":"2023-07-07 09:02:41,914", "thread":"[http-nio-0.0.0.0-8000-exec-3]", "log_level":"INFO ", "class_name":"filelogger", "log_message":"Test logging" }
+{ "date_time":"2023-07-07 09:03:38,073", "thread":"[http-nio-0.0.0.0-8000-exec-1]", "log_level":"INFO ", "class_name":"filelogger", "log_message":"Test logging" }
+{ "date_time":"2023-07-17 15:31:22,110", "log_level":"INFO ", "class_name":"filelogger", "log_message":"Test logging" }
+{ "date_time":"2023-07-17 15:32:04,101", "log_level":"INFO ", "class_name":"filelogger", "log_message":"Test logging" }
+{ "date_time":"2023-07-17 15:47:42,445", "log_level":"INFO ", "class_name":"filelogger", "log_message":"Test logging" }
+{ "date_time":"2023-07-17 15:47:58,118", "log_level":"INFO ", "class_name":"filelogger", "log_message":"Test logging" }
+{ "date_time":"2023-07-17 15:48:13,725", "log_level":"INFO ", "class_name":"filelogger", "log_message":"Test logging" }
+{ "date_time":"2023-07-28 07:00:46,817", "log_level":"INFO ", "class_name":"filelogger", "log_message":"Test logging" }
+{ "date_time":"2023-07-28 07:00:48,895", "log_level":"INFO ", "class_name":"filelogger", "log_message":"Test logging" }
+{ "date_time":"2023-07-28 07:02:13,581", "log_level":"INFO ", "class_name":"filelogger", "log_message":"Test logging" }
+{ "date_time":"2023-07-28 07:03:11,942", "log_level":"INFO ", "class_name":"filelogger", "log_message":"Test logging" }
+{ "date_time":"2023-07-28 07:04:13,519", "log_level":"INFO ", "class_name":"filelogger", "log_message":"Test logging" }
+{ "date_time":"2023-07-28 10:54:11,554", "log_level":"INFO ", "class_name":"filelogger", "log_message":"Test logging" }
+{ "date_time":"2023-07-28 10:54:57,655", "log_level":"INFO ", "class_name":"filelogger", "log_message":"Test logging" }
