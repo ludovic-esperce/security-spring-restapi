@@ -4,7 +4,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * Classe de configuration pour la sauvegarde de de fichiers.
+ * Classe de configuration pour la sauvegarde de fichiers.
  * 
  * L'annotation "@ConfigurationProperties" permet de récupérer automatique les valeurs des propriétés contenues dans le fichier "application.properties"
  */

@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -37,10 +38,10 @@ import fr.afpa.hostel.repositories.StationRepository;
 import fr.afpa.hostel.services.filestorage.FileStorageService;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.Query;
 import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
+@RequestMapping("/api/stations")
 public class StationController {
 
      /**
@@ -60,46 +61,36 @@ public class StationController {
      @PersistenceContext
      EntityManager entityManager;
 
-     private Station foo(Integer id) {
-
-          // final Iterable<Station> stations =
-
-          final Optional<Station> station = stationRepository.findById(id);
-          // final Station station = stations.iterator().next();
-
-          return station.get();
-     }
-
-     @GetMapping(value = "/stations")
+     @GetMapping
      public Iterable<Station> get() {
           return stationRepository.findAll();
      }
 
-     @CrossOrigin
-     @GetMapping(value = "/stations/{id}/**")
-     @ResponseStatus(HttpStatus.OK)
-     @Transactional
-     public Station get(@PathVariable Integer id, HttpServletRequest request) {
+     // @CrossOrigin
+     // @GetMapping(value = "/{id}/**")
+     // @ResponseStatus(HttpStatus.OK)
+     // @Transactional
+     // public Station get(@PathVariable Integer id, HttpServletRequest request) {
 
-          if (TransactionSynchronizationManager.isActualTransactionActive()) {
+     //      if (TransactionSynchronizationManager.isActualTransactionActive()) {
 
-               // récupération du l'identifiant de transaction
-               // Query query = entityManager.createQuery("select txid_current()");
+     //           // récupération du l'identifiant de transaction
+     //           // Query query = entityManager.createQuery("select txid_current()");
 
 
-               // List<Object[]> result = query.getResultList();
-               // for (Object[] a : result) {
-               // System.out.println("Transaction ID : " + a[0]);
-               // }
+     //           // List<Object[]> result = query.getResultList();
+     //           // for (Object[] a : result) {
+     //           // System.out.println("Transaction ID : " + a[0]);
+     //           // }
 
-               logger.info("Test logging");
+     //           logger.info("Test logging");
 
-               String folderPath = (String) request.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE);
-               System.out.println(folderPath);
-               return foo(id);
-          }
-          return null;
-     }
+     //           String folderPath = (String) request.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE);
+     //           System.out.println(folderPath);
+     //           return foo(id);
+     //      }
+     //      return null;
+     // }
 
      // @CrossOrigin
      // @GetMapping(value = "/stations/{id}")
@@ -109,7 +100,7 @@ public class StationController {
      // }
 
      @CrossOrigin
-     @PostMapping(value = "/stations", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+     @PostMapping(consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
      @ResponseStatus(HttpStatus.OK)
      public Station post(@ModelAttribute Station station) {
           try {
@@ -153,7 +144,7 @@ public class StationController {
      }
 
      @CrossOrigin
-     @GetMapping(value = "/stations/{id}/image", produces = { MediaType.IMAGE_JPEG_VALUE, MediaType.IMAGE_PNG_VALUE })
+     @GetMapping(value = "/{id}/image", produces = { MediaType.IMAGE_JPEG_VALUE, MediaType.IMAGE_PNG_VALUE })
      public @ResponseBody byte[] getImage(@PathVariable int id) {
 
           Path rootLocation = this.fileStorageService.getRootLocation();

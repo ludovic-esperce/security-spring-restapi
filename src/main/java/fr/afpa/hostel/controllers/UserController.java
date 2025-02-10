@@ -7,7 +7,6 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,10 +15,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import fr.afpa.hostel.models.Role;
 import fr.afpa.hostel.models.User;
 import fr.afpa.hostel.repositories.UserRepository;
-import jakarta.transaction.Transactional;
 
 @RestController
 @RequestMapping("users")
@@ -30,9 +27,6 @@ public class UserController {
      */
     @Autowired
     private UserRepository userRepository;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
 
     /**
      * Retrouve tous les utilisateurs de la base de données.
@@ -49,7 +43,7 @@ public class UserController {
      * Retrouve l'utilisateur d'identifiant "id"
      */
     @GetMapping("/{id}")
-    public ResponseEntity<User> findByUsername(@PathVariable Integer id) {
+    public ResponseEntity<User> findById(@PathVariable Integer id) {
         Optional<User> user = userRepository.findById(id);
         if (user.isPresent()) {
             return ResponseEntity.ok().body(user.get());
@@ -71,49 +65,49 @@ public class UserController {
     /**
      * Crée un nouvel utilisateur
      */
-    @PostMapping
-    public ResponseEntity<User> save(@RequestBody User user) {
+    // @PostMapping
+    // public ResponseEntity<User> save(@RequestBody User user) {
 
-        // on encode le mot de passe récupéré
-        String encodedPassword = passwordEncoder.encode(user.getPassword());
-        user.setPassword(encodedPassword);
+    //     // on encode le mot de passe récupéré
+    //     String encodedPassword = passwordEncoder.encode(user.getPassword());
+    //     user.setPassword(encodedPassword);
 
-        // une fois le mot de passe encodé on peut le sauvegardé
-        User newUser = userRepository.save(user);
+    //     // une fois le mot de passe encodé on peut le sauvegardé
+    //     User newUser = userRepository.save(user);
 
-        // Création de l'URI indiquant l'emplacement de la nouvelle ressource
-        URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentRequest().path("/{username}")
-                .buildAndExpand(newUser.getName()).toUriString());
-        return ResponseEntity.created(uri).body(user);
-    }
+    //     // Création de l'URI indiquant l'emplacement de la nouvelle ressource
+    //     URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentRequest().path("/{username}")
+    //             .buildAndExpand(newUser.getName()).toUriString());
+    //     return ResponseEntity.created(uri).body(user);
+    // }
 
     /**
      * Permet de récupérer tous les roles d'un utilisateur donné
      */
-    @GetMapping("/{id}/roles")
-    public ResponseEntity<Collection<Role>> getRoles(@PathVariable Integer id) {
-        Optional<User> user = userRepository.findById(id);
-        if (user.isPresent()) {
-            return ResponseEntity.ok().body(user.get().getRoles());
-        } else {
-            return ResponseEntity.notFound().build();
-        }
-    }
+    // @GetMapping("/{id}/roles")
+    // public ResponseEntity<Collection<Role>> getRoles(@PathVariable Integer id) {
+    //     Optional<User> user = userRepository.findById(id);
+    //     if (user.isPresent()) {
+    //         return ResponseEntity.ok().body(user.get().getRoles());
+    //     } else {
+    //         return ResponseEntity.notFound().build();
+    //     }
+    // }
 
     /**
      * Associe un role à un utilisateur
      */
-    @PostMapping("/{id}/roles")
-    public ResponseEntity<?> addRole(@PathVariable Integer id, @RequestBody Role role) {
-        Optional<User> user = userRepository.findById(id);
-        if (user.isPresent()) {
-            user.get().addRole(role);
-            URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
-                    .buildAndExpand(user.get().getId()).toUriString());
-            return ResponseEntity.created(uri).body(user.get());
-        } else {
-            return ResponseEntity.notFound().build();
-        }
-    }
+    // @PostMapping("/{id}/roles")
+    // public ResponseEntity<?> addRole(@PathVariable Integer id, @RequestBody Role role) {
+    //     Optional<User> user = userRepository.findById(id);
+    //     if (user.isPresent()) {
+    //         user.get().addRole(role);
+    //         URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
+    //                 .buildAndExpand(user.get().getId()).toUriString());
+    //         return ResponseEntity.created(uri).body(user.get());
+    //     } else {
+    //         return ResponseEntity.notFound().build();
+    //     }
+    // }
 
 }

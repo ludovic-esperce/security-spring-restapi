@@ -1,20 +1,19 @@
-version: '3.8'
 services:
-  hostel-webap:
-    image: 'hostel-webapi'
-    ports:
-      - "8000:8000"
-    depends_on:
-      PostgreSQL:
-        condition: service_healthy
-    environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://PostgreSQL:5432/hotel
-      - SPRING_DATASOURCE_USERNAME=webapi
-      - SPRING_DATASOURCE_PASSWORD=6LXTSaisjymEsc
-      - SPRING_JPA_HIBERNATE_DDL_AUTO=none
+  # hostel-webap:
+  #   image: 'hostel-webapi'
+  #   ports:
+  #     - "8000:8000"
+  #   depends_on:
+  #     PostgreSQL:
+  #       condition: service_healthy
+  #   environment:
+  #     - SPRING_DATASOURCE_URL=jdbc:postgresql://PostgreSQL:5432/hotel
+  #     - SPRING_DATASOURCE_USERNAME=webapi
+  #     - SPRING_DATASOURCE_PASSWORD=6LXTSaisjymEsc
+  #     - SPRING_JPA_HIBERNATE_DDL_AUTO=none
 
   PostgreSQL:
-    image: postgres:15
+    image: postgres:17.2
     container_name: hotel-db
     environment:
       - POSTGRES_USER=postgres

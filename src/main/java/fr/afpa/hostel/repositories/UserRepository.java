@@ -1,5 +1,7 @@
 package fr.afpa.hostel.repositories;
 
+import java.util.Optional;
+
 import org.springframework.data.repository.CrudRepository;
 
 import fr.afpa.hostel.models.User;
@@ -16,5 +18,7 @@ public interface UserRepository extends CrudRepository<User, Integer> {
      * @return L'utilisateur retrouvé
      */
     User findByName(String name);
+
+    Optional<User> findByEmail(String email);
  }
  
