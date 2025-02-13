@@ -30,8 +30,6 @@ public class UserController {
 
     /**
      * Retrouve tous les utilisateurs de la base de données.
-     * 
-     * @return
      */
     @GetMapping
     public ResponseEntity<Iterable<User>> findAll() {

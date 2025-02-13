@@ -78,5 +78,4 @@ public class AuthenticationController {
                 .setExpiresIn(jwtService.getExpirationTime());
         return ResponseEntity.ok(loginResponse);
     }
-
 }

@@ -8,14 +8,10 @@ import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Optional;
 
-import org.hibernate.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -26,19 +22,17 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
-import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.jdbc.object.SqlQuery;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.http.ResponseEntity;
 
+import fr.afpa.hostel.dto.Response;
 import fr.afpa.hostel.models.Station;
-import fr.afpa.hostel.repositories.StationRepository;
+import fr.afpa.hostel.services.StationService;
 import fr.afpa.hostel.services.filestorage.FileStorageService;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 @RequestMapping("/api/stations")
@@ -52,54 +46,45 @@ public class StationController {
       */
      Logger logger = LoggerFactory.getLogger("fr.afpa.filelogger");
 
-     @Autowired
-     private StationRepository stationRepository;
-
-     @Autowired
-     private FileStorageService fileStorageService;
-
      @PersistenceContext
      EntityManager entityManager;
 
-     @GetMapping
-     public Iterable<Station> get() {
-          return stationRepository.findAll();
+     private final StationService stationsService;
+
+     private FileStorageService fileStorageService;
+
+     public StationController(StationService stationsService, FileStorageService fileStorageService) {
+          this.stationsService = stationsService;
+          this.fileStorageService = fileStorageService;
      }
 
-     // @CrossOrigin
-     // @GetMapping(value = "/{id}/**")
-     // @ResponseStatus(HttpStatus.OK)
-     // @Transactional
-     // public Station get(@PathVariable Integer id, HttpServletRequest request) {
+     /**
+      * Répond aux requêtes GET demandant à récupérer toutes les stations.
+      */
+     @GetMapping
+     public Iterable<Station> get() {
+          return stationsService.find();
+     }
 
-     //      if (TransactionSynchronizationManager.isActualTransactionActive()) {
+     /**
+      * Répond aux requêtes GET demandant à récupérer une station selon son
+      * identifiant.
+      * 
+      * @param id L'identifiant de la station
+      * @return
+      */
+     @GetMapping(value = "/{id}")
+     public ResponseEntity<?> get(@RequestParam Integer id) {
 
-     //           // récupération du l'identifiant de transaction
-     //           // Query query = entityManager.createQuery("select txid_current()");
+          Optional<Station> optionalStation = this.stationsService.findById(id);
 
+          if (optionalStation.isPresent()) {
+               return new ResponseEntity<>(optionalStation.get(), HttpStatus.OK);
+          } else {
+               return new ResponseEntity<>(new Response("message", "Identifiant inconnu"), HttpStatus.NOT_FOUND);
+          }
+     }
 
-     //           // List<Object[]> result = query.getResultList();
-     //           // for (Object[] a : result) {
-     //           // System.out.println("Transaction ID : " + a[0]);
-     //           // }
-
-     //           logger.info("Test logging");
-
-     //           String folderPath = (String) request.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE);
-     //           System.out.println(folderPath);
-     //           return foo(id);
-     //      }
-     //      return null;
-     // }
-
-     // @CrossOrigin
-     // @GetMapping(value = "/stations/{id}")
-     // @ResponseStatus(HttpStatus.OK)
-     // public Station get(@PathVariable(required = true) Integer id) {
-     // return stationRepository.findById(id).get();
-     // }
-
-     @CrossOrigin
      @PostMapping(consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
      @ResponseStatus(HttpStatus.OK)
      public Station post(@ModelAttribute Station station) {
@@ -132,7 +117,7 @@ public class StationController {
                }
 
                // on modifie la BDD même sans image
-               return stationRepository.save(station);
+               return stationsService.save(station);
 
           } catch (IOException e) {
                logger.error(e.getMessage());
@@ -143,12 +128,11 @@ public class StationController {
                     "Impossible de sauvegarder la ressource.");
      }
 
-     @CrossOrigin
      @GetMapping(value = "/{id}/image", produces = { MediaType.IMAGE_JPEG_VALUE, MediaType.IMAGE_PNG_VALUE })
      public @ResponseBody byte[] getImage(@PathVariable int id) {
 
           Path rootLocation = this.fileStorageService.getRootLocation();
-          Optional<Station> station = stationRepository.findById(id);
+          Optional<Station> station = stationsService.findById(id);
 
           if (station.isPresent()) {
 
